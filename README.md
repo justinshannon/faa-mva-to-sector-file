@@ -1,5 +1,5 @@
 # Convert FAA MVA and MIA XML to Sector File Format
-This tool will convert FAA MVA and MIA charts to the sector file format for use on the VATSIM Network.
+This tool will convert FAA MVA and MIA charts to the sector file format for use on networks like VATSIM.
 
 The XML files can be downloaded from the FAA's website at https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/mva_mia/
 
