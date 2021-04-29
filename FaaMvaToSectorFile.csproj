@@ -3,6 +3,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Justin Shannon</Authors>
+    <Company />
+    <Version>1.0.1</Version>
+    <RepositoryUrl>https://github.com/justinshannon/faa-mva-to-sector-file</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
