@@ -7,14 +7,14 @@ using System.Text;
 
 namespace FaaMvaToSectorFile
 {
-    class Program
+    internal class Program
     {
         private static double mCenterLat;
         private static double mCenterLon;
         private static string mColorKey;
         private static string mMapName;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length < 2)
             {
@@ -71,16 +71,15 @@ namespace FaaMvaToSectorFile
 
                 ReverseArray(coords);
 
-                List<string> interiorCoords = new List<string>();
+                var interiorCoords = new List<string>();
                 if (member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
                     .AirspaceGeometryComponent.theAirspaceVolume.AirspaceVolume.horizontalProjection.Surface.patches
                     .PolygonPatch.interior != null)
                 {
-                    foreach (var interior in member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
+                    foreach (var tmp in member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
                         .AirspaceGeometryComponent.theAirspaceVolume.AirspaceVolume.horizontalProjection.Surface.patches
-                        .PolygonPatch.interior)
+                        .PolygonPatch.interior.Select(interior => interior.LinearRing.posList.Split(' ')))
                     {
-                        var tmp = interior.LinearRing.posList.Split(' ');
                         ReverseArray(tmp);
                         interiorCoords.AddRange(tmp);
                     }
@@ -155,16 +154,15 @@ namespace FaaMvaToSectorFile
 
                 ReverseArray(coords);
 
-                List<string> interiorCoords = new List<string>();
+                var interiorCoords = new List<string>();
                 if (member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
                     .AirspaceGeometryComponent.theAirspaceVolume.AirspaceVolume.horizontalProjection.Surface.patches
                     .PolygonPatch.interior != null)
                 {
-                    foreach (var interior in member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
+                    foreach (var tmp in member.Airspace.timeSlice.AirspaceTimeSlice1.geometryComponent
                         .AirspaceGeometryComponent.theAirspaceVolume.AirspaceVolume.horizontalProjection.Surface.patches
-                        .PolygonPatch.interior)
+                        .PolygonPatch.interior.Select(interior => interior.LinearRing.posList.Split(' ')))
                     {
-                        var tmp = interior.LinearRing.posList.Split(' ');
                         ReverseArray(tmp);
                         interiorCoords.AddRange(tmp);
                     }
@@ -226,57 +224,59 @@ namespace FaaMvaToSectorFile
         private static void CreateMvaTextLabels(StringBuilder sb, double averageCellSize, string mvaLabel,
             List<MyPoint> polygonPoints)
         {
-            if (!string.IsNullOrEmpty(mvaLabel))
+            if (string.IsNullOrEmpty(mvaLabel))
             {
-                var poly = PolyLabel.GetPolyLabel(polygonPoints);
-                var x = poly.Centroid.X;
-                var y = poly.Centroid.Y;
+                return;
+            }
 
-                var scale = averageCellSize;
-                var xpos = x - (mvaLabel.Length - 1) * 20 * scale;
+            var scale = Math.Min(Math.Max(0.03f, averageCellSize), 0.5f);
 
-                foreach (var digit in mvaLabel.ToCharArray())
+            var polyLabel = PolyLabel.GetPolyLabel(polygonPoints);
+
+            var x = polyLabel.Centroid.X - (mvaLabel.Length - 1) * 20 * scale;
+            var y = polyLabel.Centroid.Y;
+
+            foreach (var digit in mvaLabel.ToCharArray())
+            {
+                switch (digit)
                 {
-                    switch (digit)
-                    {
-                        case '0':
-                            GetCharacterPoints(HersheyFont.Zero, xpos, y, scale, sb);
-                            break;
-                        case '1':
-                            GetCharacterPoints(HersheyFont.One, xpos, y, scale, sb);
-                            break;
-                        case '2':
-                            GetCharacterPoints(HersheyFont.Two, xpos, y, scale, sb);
-                            break;
-                        case '3':
-                            GetCharacterPoints(HersheyFont.Three, xpos, y, scale, sb);
-                            break;
-                        case '4':
-                            GetCharacterPoints(HersheyFont.Four, xpos, y, scale, sb);
-                            break;
-                        case '5':
-                            GetCharacterPoints(HersheyFont.Five, xpos, y, scale, sb);
-                            break;
-                        case '6':
-                            GetCharacterPoints(HersheyFont.Six, xpos, y, scale, sb);
-                            break;
-                        case '7':
-                            GetCharacterPoints(HersheyFont.Seven, xpos, y, scale, sb);
-                            break;
-                        case '8':
-                            GetCharacterPoints(HersheyFont.Eight, xpos, y, scale, sb);
-                            break;
-                        case '9':
-                            GetCharacterPoints(HersheyFont.Nine, xpos, y, scale, sb);
-                            break;
-                    }
-
-                    xpos += (20 * scale);
+                    case '0':
+                        GetCharacterLines(HersheyFont.Zero, x, y, scale, sb);
+                        break;
+                    case '1':
+                        GetCharacterLines(HersheyFont.One, x, y, scale, sb);
+                        break;
+                    case '2':
+                        GetCharacterLines(HersheyFont.Two, x, y, scale, sb);
+                        break;
+                    case '3':
+                        GetCharacterLines(HersheyFont.Three, x, y, scale, sb);
+                        break;
+                    case '4':
+                        GetCharacterLines(HersheyFont.Four, x, y, scale, sb);
+                        break;
+                    case '5':
+                        GetCharacterLines(HersheyFont.Five, x, y, scale, sb);
+                        break;
+                    case '6':
+                        GetCharacterLines(HersheyFont.Six, x, y, scale, sb);
+                        break;
+                    case '7':
+                        GetCharacterLines(HersheyFont.Seven, x, y, scale, sb);
+                        break;
+                    case '8':
+                        GetCharacterLines(HersheyFont.Eight, x, y, scale, sb);
+                        break;
+                    case '9':
+                        GetCharacterLines(HersheyFont.Nine, x, y, scale, sb);
+                        break;
                 }
+
+                x += (20 * scale);
             }
         }
 
-        private static void GetCharacterPoints(int[] characterArray, double xPos, double yPos, double scale,
+        private static void GetCharacterLines(int[] characterArray, double xPos, double yPos, double scale,
             StringBuilder stringBuilder)
         {
             // Translate the font points into usable geo points for sector files
@@ -290,26 +290,26 @@ namespace FaaMvaToSectorFile
 
             for (var i = 0; i < temp.Count; i++)
             {
-                var x3 = i == 0 ? (xPos + temp[i].X * scale) : (xPos + temp[i - 1].X * scale);
-                var y3 = i == 0 ? (yPos + (-1) * temp[i].Y * scale) : (yPos + (-1) * temp[i - 1].Y * scale);
-                var pt1 = GeoUtils.PixelsToGeo(x3, y3, mCenterLat, mCenterLon);
-                var lat3 = pt1.Lat.ToDMS();
-                var lon3 = pt1.Lon.ToDMS();
+                var x1 = i == 0 ? (xPos + temp[i].X * scale) : (xPos + temp[i - 1].X * scale);
+                var y1 = i == 0 ? (yPos + (-1) * temp[i].Y * scale) : (yPos + (-1) * temp[i - 1].Y * scale);
+                var pt1 = GeoUtils.PixelsToGeo(x1, y1, mCenterLat, mCenterLon);
+                var lat1 = pt1.Lat.ToDMS();
+                var lon1 = pt1.Lon.ToDMS();
 
-                var x4 = i == 0 ? (xPos + temp[i + 1].X * scale) : (xPos + temp[i].X * scale);
-                var y4 = i == 0 ? (yPos + (-1) * temp[i + 1].Y * scale) : (yPos + (-1) * temp[i].Y * scale);
-                var pt2 = GeoUtils.PixelsToGeo(x4, y4, mCenterLat, mCenterLon);
-                var lat4 = pt2.Lat.ToDMS();
-                var lon4 = pt2.Lon.ToDMS();
+                var x2 = i == 0 ? (xPos + temp[i + 1].X * scale) : (xPos + temp[i].X * scale);
+                var y2 = i == 0 ? (yPos + (-1) * temp[i + 1].Y * scale) : (yPos + (-1) * temp[i].Y * scale);
+                var pt2 = GeoUtils.PixelsToGeo(x2, y2, mCenterLat, mCenterLon);
+                var lat2 = pt2.Lat.ToDMS();
+                var lon2 = pt2.Lon.ToDMS();
 
-                stringBuilder.AppendLine($"{new string(' ', 26)}{lat3} {lon3} {lat4} {lon4} {mColorKey}");
+                stringBuilder.AppendLine($"{new string(' ', 26)}{lat1} {lon1} {lat2} {lon2} {mColorKey}");
             }
         }
 
         private static void ReverseArray(IList<string> array, int splitLength = 2)
         {
-            // Flips the coordinate arrays because we consume them as y,x/lon,lat but
-            // we want them as x,y/lat,lon
+            // Flips the coordinate arrays because we consume them as [x,y] or [lon,lat] but
+            // we want [x,y] or [lat,lon]
 
             for (var i = 0; i < array.Count; i += splitLength)
             {
