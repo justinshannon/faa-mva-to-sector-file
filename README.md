@@ -23,7 +23,7 @@ You can optionally provide a third argument to specify the color key
 A compiled exe binary of this tool can be downloaded from the Releases section of this repository. Alternatively, you can build the project yourself. 
 
 ## License
-This project is licensed under the [GPLv3 License.](LICENSE).
+This project is licensed under the [GPLv3 License](LICENSE).
 
 ## Acknowledgements
 * [Polylabel](https://github.com/mapbox/polylabel) and [Polylabel-CSharp](https://github.com/qodbtn41/polylabel-csharp)
